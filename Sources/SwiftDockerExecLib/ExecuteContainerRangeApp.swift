@@ -20,7 +20,7 @@ fileprivate var ramDisk: RamDisk? = nil
 
 public enum DockerContainerRangeApp {
     
-    public static let version: String = "1.0.0"
+    public static let version: String = "1.0.1"
     /// Collection of aruguments that this CLI Application collects
     public enum Arguments {
         
@@ -994,12 +994,12 @@ public enum DockerContainerRangeApp {
                     if let subCommand = swiftSubCommand {
                         workingArguments.append(subCommand)
                     }
-                    workingArguments.append(contentsOf: action.postSubCommandArguments(callType: .singular,
+                    workingArguments.append(contentsOf: action.postSubCommandArguments(callType: .range,
                                                                                        image: workingContainerApp,
                                                                                        tag: workingTag,
                                                                                        userArguments: dockerContainerArguments))
                     workingArguments.append(contentsOf: dockerContainerArguments)
-                    workingArguments.append(contentsOf: action.postUserArgumentsArguments(callType: .singular,
+                    workingArguments.append(contentsOf: action.postUserArgumentsArguments(callType: .range,
                                                                                           image: workingContainerApp,
                                                                                           tag: workingTag,
                                                                                           userArguments: dockerContainerArguments))
