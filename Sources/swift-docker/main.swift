@@ -15,11 +15,19 @@ guard arguments.count > 1 else {
     exit(1)
 }
 
+print(arguments.map({ $0.contains(" ") ? "'\($0)'" : $0 }).joined(separator: " "))
 let strAction = arguments[1].lowercased()
-guard let action = DockerContainerApp.Actions.all.first(where: { $0.action == strAction }) else {
+guard var action = DockerContainerApp.Actions.all.first(where: { $0.action == strAction }) else {
     print("Invalid sub command '\(arguments[1])'")
     print("Available sub commands: \(DockerContainerApp.Actions.actions.joined(separator: ", "))")
     exit(1)
+}
+
+if action.action == "execute",
+   let packageIdx = arguments.firstIndex(of: "package") {
+    action = DockerContainerApp.Actions.Package.self
+    arguments[1] = "package"
+    arguments.remove(at: packageIdx)
 }
 
 //print(arguments.joined(separator: " "))

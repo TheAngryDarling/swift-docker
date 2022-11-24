@@ -12,7 +12,7 @@ import SwiftDockerCoreLib
 
 public enum DockerContainerApp {
     
-    public static let version: String = "1.0.0"
+    public static let version: String = "1.0.1"
     /// Collection of different actions that are available to perform
     public enum Actions {
         /// Define the Swift Build Action
@@ -116,8 +116,33 @@ public enum DockerContainerApp {
             }
         }
         
+        /// Define the Swift custom action
+        public enum Package: DockerSwiftAction {
+            public static let singleActionAppDescription: String? = "Package management command"
+            public static let rangeActionAppDescription: String? = nil
+            public static let swiftSubCommand: String? = "package"
+            public static let action: String = "package"
+
+            public static let primaryActionMessage: String = "Package management with %tag%"
+            public static let retryingMessage: String = "Retrying Package management on %tag%"
+            public static let errorMessage: String = "Failed to manage package on %tag%"
+            public static let warningMessage: String = "Package managed with warnings on %tag%"
+            public static let successfulMessage: String = "Package management ran successfully on %tag%"
+            
+            public static func postSubCommandArguments(callType: DockerSwiftActionCallType,
+                                                       image: DockerRepoContainerApp,
+                                                       tag: DockerHub.RepositoryTag,
+                                                       userArguments: [String]) -> [String] {
+                return []
+            }
+        }
+        
         public static var all: [DockerSwiftAction.Type] {
-            return [Actions.Build.self, Actions.Test.self, Actions.Run.self, Actions.Execute.self]
+            return [Actions.Build.self,
+                    Actions.Test.self,
+                    Actions.Run.self,
+                    Actions.Execute.self,
+                    Actions.Package.self]
         }
         public static var actions: [String] {
             return all.map({ return $0.action })

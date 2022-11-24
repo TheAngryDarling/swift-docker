@@ -16,10 +16,17 @@ guard arguments.count > 1 else {
 }
 
 let strAction = arguments[1].lowercased()
-guard let action = DockerContainerApp.Actions.all.first(where: { $0.action == strAction }) else {
+guard var action = DockerContainerApp.Actions.all.first(where: { $0.action == strAction }) else {
     print("Invalid sub command '\(arguments[1])'")
     print("Available sub commands: \(DockerContainerApp.Actions.actions.joined(separator: ", "))")
     exit(1)
+}
+
+if action.action == "run",
+   let packageIdx = arguments.firstIndex(of: "package") {
+    action = DockerContainerApp.Actions.Package.self
+    arguments[1] = "package"
+    arguments.remove(at: packageIdx)
 }
 
 // remove the sub command from the arguments
