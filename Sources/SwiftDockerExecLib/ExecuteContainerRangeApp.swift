@@ -789,9 +789,14 @@ public enum DockerContainerRangeApp {
             var usedTagsDetails: [DockerHub.RepositoryTagDetails] = []
             // Loop through the list of tags to test
             
+            let totalTestsCharCount = "\(totalTests)".count
             
             for i in lowerIdx..<upperBounds where !stop {
                 let currentTest = (i-lowerIdx) + 1
+                var sCurrentTest = "\(currentTest)"
+                while sCurrentTest.count < totalTestsCharCount {
+                    sCurrentTest = " " + sCurrentTest
+                }
                 
                 let tagDetails = allTags[i]
                 
@@ -802,7 +807,7 @@ public enum DockerContainerRangeApp {
                 if skipIdenticalHashes,
                     let tag = usedTagsDetails.first(where: { return currentHashes.containsAny($0.digests) }) {
                     skippedCount += 1
-                    print("[\(currentTest)/\(totalTests)]: Skipping '\(currentTag)' because it matches '\(tag.name)' ")
+                    print("[\(sCurrentTest)/\(totalTests)]: Skipping '\(currentTag)' because it matches '\(tag.name)' ")
                     continue
                 }
                 
@@ -830,7 +835,7 @@ public enum DockerContainerRangeApp {
                         do {
                             try FileManager.default.createDirectory(atPath: bd, withIntermediateDirectories: true)
                         } catch {
-                            print("[\(currentTest)/\(totalTests)]: Failed to create Build All Tag Dir '\(bd)': \(error)")
+                            print("[\(sCurrentTest)/\(totalTests)]: Failed to create Build All Tag Dir '\(bd)': \(error)")
                             return 1
                         }
                         let virtualBuildDir = NSString(string: projectDir).appendingPathComponent(".build")
@@ -904,7 +909,7 @@ public enum DockerContainerRangeApp {
                 
                 guard workingContainerApp != nil else {
                     
-                    print("[\(currentTest)/\(totalTests)]: Unable to find a usable repository name in " + workingContainerAppList.map({ return "'\($0.name)'" }).joined(separator: ",") + " with tag '\(currentTag)'")
+                    print("[\(sCurrentTest)/\(totalTests)]: Unable to find a usable repository name in " + workingContainerAppList.map({ return "'\($0.name)'" }).joined(separator: ",") + " with tag '\(currentTag)'")
                     print(imageTestResp.err)
                     exit(1)
                 }
@@ -1008,10 +1013,10 @@ public enum DockerContainerRangeApp {
                         shouldOutputResponse = false
                         if retryCount > 0 {
                             retryCountNaming = "retry-\(retryCount)"
-                            print("[\(currentTest)/\(totalTests)]: " + retryingMessage.replacingOccurrences(of: "%tag%",
+                            print("[\(sCurrentTest)/\(totalTests)]: " + retryingMessage.replacingOccurrences(of: "%tag%",
                                                                        with: "\(repoName)\(displayTagName)"))
                         } else {
-                            print("[\(currentTest)/\(totalTests)]: " + primaryActionMessage.replacingOccurrences(of: "%tag%",
+                            print("[\(sCurrentTest)/\(totalTests)]: " + primaryActionMessage.replacingOccurrences(of: "%tag%",
                                                                             with: "\(repoName)\(displayTagName)"))
                         }
                         let startTime = Date()
@@ -1118,7 +1123,7 @@ public enum DockerContainerRangeApp {
                             retryCount += 1
                             shouldOutputResponse = true
                             
-                            print("[\(currentTest)/\(totalTests)]: " + errorMessage.replacingOccurrences(of: "%tag%",
+                            print("[\(sCurrentTest)/\(totalTests)]: " + errorMessage.replacingOccurrences(of: "%tag%",
                                                                     with: "\(repoName)\(displayTagName)") + ".  Duration: \(formatTimeInterval(duration))")
                             
                             if retryCount >= 3 || !DockerResponse.containsRetryableErrors(resp!.output) {
@@ -1162,7 +1167,7 @@ public enum DockerContainerRangeApp {
                             warningCount += 1
                             shouldOutputResponse = true
                             warningTags.append(workingTag)
-                            print("[\(currentTest)/\(totalTests)]: " + warningMessage.replacingOccurrences(of: "%tag%",
+                            print("[\(sCurrentTest)/\(totalTests)]: " + warningMessage.replacingOccurrences(of: "%tag%",
                                                                       with: "\(repoName)\(displayTagName)") + ".  Duration: \(formatTimeInterval(duration))")
                         } else if DockerResponse.containsDockerError(resp!.output) {
                             print(resp!.output)
@@ -1171,7 +1176,7 @@ public enum DockerContainerRangeApp {
                             retryCount = 3
                             passedCount += 1
                             shouldOutputResponse = false
-                            print("[\(currentTest)/\(totalTests)]: " + successfulMessage.replacingOccurrences(of: "%tag%",
+                            print("[\(sCurrentTest)/\(totalTests)]: " + successfulMessage.replacingOccurrences(of: "%tag%",
                                                                          with: "\(repoName)\(displayTagName)") + ".  Duration: \(formatTimeInterval(duration))")
                         }
                     }
@@ -1187,7 +1192,7 @@ public enum DockerContainerRangeApp {
                         print(out)
                     }
                 } catch {
-                    print("[\(currentTest)/\(totalTests)]: Fatal Error trying container '\(workingContainerApp.name):\(currentTag)'")
+                    print("[\(sCurrentTest)/\(totalTests)]: Fatal Error trying container '\(workingContainerApp.name):\(currentTag)'")
                     print(error)
                 }
             }

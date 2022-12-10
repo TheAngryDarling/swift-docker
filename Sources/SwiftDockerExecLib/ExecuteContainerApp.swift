@@ -664,7 +664,7 @@ public enum DockerContainerApp {
                                                containerWorkingDirectory: projectDir,
                                                containerCommand: containerCommand,
                                                containerArguments: workingArguments,
-                                               showCommand: true)
+                                               showCommand: false)
                 let endTime = Date()
                 let duration = endTime.timeIntervalSince(startTime)
                 if resp!.terminationStatus != 0 ||

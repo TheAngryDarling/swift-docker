@@ -357,18 +357,18 @@ public enum Docker {
                                            passthrougOptions: (hideOutput ? .none : .all))
     }
     
-    private static func buildDockerArguments(image: String,
-                                             containerName: String? = nil,
-                                             dockerArguments: [String] = [],
-                                             autoRemove: Bool = true,
-                                             supportInput: Bool = false,
-                                             detach: Bool = false,
-                                             dockerEnvironment: [String: String] = [:],
-                                             mountMapping: [MountMapping] = [],
-                                             volumeMapping: [VolumeMapping] = [],
-                                             containerWorkingDirectory: String? = nil,
-                                             containerCommand: String?,
-                                             containerArguments: [String] = []) -> [String] {
+    private static func buildDockerContainerArguments(image: String,
+                                                      containerName: String? = nil,
+                                                      dockerArguments: [String] = [],
+                                                      autoRemove: Bool = true,
+                                                      supportInput: Bool = false,
+                                                      detach: Bool = false,
+                                                      dockerEnvironment: [String: String] = [:],
+                                                      mountMapping: [MountMapping] = [],
+                                                      volumeMapping: [VolumeMapping] = [],
+                                                      containerWorkingDirectory: String? = nil,
+                                                      containerCommand: String?,
+                                                      containerArguments: [String] = []) -> [String] {
         var args: [String] = ["run"]
         if autoRemove { args.append("--rm") }
         //args.append("-it")
@@ -383,7 +383,8 @@ public enum Docker {
             args.append("--name")
             args.append(n)
         }
-        
+        // disable logging
+        args.append(contentsOf: ["--log-driver", "none"])
         args.append(contentsOf: dockerArguments)
         for (k,v) in dockerEnvironment {
             args.append("-e")
@@ -431,7 +432,7 @@ public enum Docker {
                                         showCommand: Bool = false,
                                         hideOutput: Bool) throws -> Int32 {
         
-        let args = buildDockerArguments(image: image,
+        let args = buildDockerContainerArguments(image: image,
                                         containerName: containerName,
                                         dockerArguments: dockerArguments,
                                         autoRemove: autoRemove,
@@ -467,7 +468,7 @@ public enum Docker {
                                     showCommand: Bool = false,
                                     timeout: DispatchTime = .distantFuture) throws -> (terminationStatus: Int32,
                                                                                     output: String) {
-        let args = buildDockerArguments(image: image,
+        let args = buildDockerContainerArguments(image: image,
                                         containerName: containerName,
                                         dockerArguments: dockerArguments,
                                         autoRemove: autoRemove,

@@ -15,7 +15,7 @@ guard arguments.count > 1 else {
     exit(1)
 }
 
-print(arguments.map({ $0.contains(" ") ? "'\($0)'" : $0 }).joined(separator: " "))
+//print(arguments.map({ $0.contains(" ") ? "'\($0)'" : $0 }).joined(separator: " "))
 let strAction = arguments[1].lowercased()
 guard var action = DockerContainerApp.Actions.all.first(where: { $0.action == strAction }) else {
     print("Invalid sub command '\(arguments[1])'")
