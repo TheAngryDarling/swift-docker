@@ -379,7 +379,7 @@ public enum Docker {
         if detach {
             args.append("-d")
         }
-        if let n = containerName {
+        if let n = containerName?.replacingOccurrences(of: " ", with: "_") {
             args.append("--name")
             args.append(n)
         }
@@ -506,7 +506,7 @@ public enum Docker {
         
         rtn += "-" + String.randomAlphaNumericString(count: 8, using: &generator)
         
-        return rtn
+        return rtn.replacingOccurrences(of: " ", with: "_")
     }
     
     
