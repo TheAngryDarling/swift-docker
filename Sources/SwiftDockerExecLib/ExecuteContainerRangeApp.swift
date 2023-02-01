@@ -20,7 +20,7 @@ fileprivate var ramDisk: RamDisk? = nil
 
 public enum DockerContainerRangeApp {
     
-    public static let version: String = "1.0.3"
+    public static let version: String = "1.0.4"
     /// Collection of aruguments that this CLI Application collects
     public enum Arguments {
         
@@ -1012,6 +1012,9 @@ public enum DockerContainerRangeApp {
                     while retryCount < 3 {
                         shouldOutputResponse = false
                         if retryCount > 0 {
+                            print("\u{1B}[2K", terminator: "") //errase line
+                            print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line and
+                            
                             retryCountNaming = "retry-\(retryCount)"
                             print("[\(sCurrentTest)/\(totalTests)]: " + retryingMessage.replacingOccurrences(of: "%tag%",
                                                                        with: "\(repoName)\(displayTagName)"))
@@ -1123,6 +1126,8 @@ public enum DockerContainerRangeApp {
                             retryCount += 1
                             shouldOutputResponse = true
                             
+                            print("\u{1B}[2K", terminator: "") //errase line
+                            print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line and errase it
                             print("[\(sCurrentTest)/\(totalTests)]: " + errorMessage.replacingOccurrences(of: "%tag%",
                                                                     with: "\(repoName)\(displayTagName)") + ".  Duration: \(formatTimeInterval(duration))")
                             
@@ -1167,6 +1172,8 @@ public enum DockerContainerRangeApp {
                             warningCount += 1
                             shouldOutputResponse = true
                             warningTags.append(workingTag)
+                            print("\u{1B}[2K", terminator: "") //errase line
+                            print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line and errase it
                             print("[\(sCurrentTest)/\(totalTests)]: " + warningMessage.replacingOccurrences(of: "%tag%",
                                                                       with: "\(repoName)\(displayTagName)") + ".  Duration: \(formatTimeInterval(duration))")
                         } else if DockerResponse.containsDockerError(resp!.output) {
@@ -1176,6 +1183,8 @@ public enum DockerContainerRangeApp {
                             retryCount = 3
                             passedCount += 1
                             shouldOutputResponse = false
+                            print("\u{1B}[2K", terminator: "") //errase line
+                            print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line and errase it
                             print("[\(sCurrentTest)/\(totalTests)]: " + successfulMessage.replacingOccurrences(of: "%tag%",
                                                                          with: "\(repoName)\(displayTagName)") + ".  Duration: \(formatTimeInterval(duration))")
                         }
@@ -1192,6 +1201,8 @@ public enum DockerContainerRangeApp {
                         print(out)
                     }
                 } catch {
+                    print("\u{1B}[2K", terminator: "") //errase line
+                    print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line and errase it
                     print("[\(sCurrentTest)/\(totalTests)]: Fatal Error trying container '\(workingContainerApp.name):\(currentTag)'")
                     print(error)
                 }

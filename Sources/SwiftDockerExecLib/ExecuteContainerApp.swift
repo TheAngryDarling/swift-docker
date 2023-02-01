@@ -12,9 +12,12 @@ import SwiftDockerCoreLib
 
 public enum DockerContainerApp {
     
-    public static let version: String = "1.0.2"
+    public static let version: String = "1.0.4"
     /// Collection of different actions that are available to perform
     public enum Actions {
+        private static let colourRed: Int = 196
+        private static let colourYellow: Int = 226
+        private static let colourGreen: Int = 118//154
         /// Define the Swift Build Action
         public enum Build: DockerSwiftAction {
             public static let singleActionAppDescription: String? = "Build a Swift Package against a specific Docker Swift Version"
@@ -24,9 +27,9 @@ public enum DockerContainerApp {
 
             public static let primaryActionMessage: String = "Building with %tag%"
             public static let retryingMessage: String = "Retrying build on %tag%"
-            public static let errorMessage: String = "Failed to build on %tag%"
-            public static let warningMessage: String = "Built with warnings on %tag%"
-            public static let successfulMessage: String = "Built successfully on %tag%"
+            public static let errorMessage: String = "\u{1B}[38;5;\(colourRed)mFailed\u{1B}[0m to build on %tag%"
+            public static let warningMessage: String = "Built with \u{1B}[38;5;\(colourYellow)mwarnings\u{1B}[0m on %tag%"
+            public static let successfulMessage: String = "Built \u{1B}[38;5;\(colourGreen)msuccessfully\u{1B}[0m on %tag%"
             
             public static func postSubCommandArguments(callType: DockerSwiftActionCallType,
                                                        image: DockerRepoContainerApp,
@@ -49,9 +52,9 @@ public enum DockerContainerApp {
 
             public static let primaryActionMessage: String = "Testing with %tag%"
             public static let retryingMessage: String = "Retrying test on %tag%"
-            public static let errorMessage: String = "Tests failed on %tag%"
-            public static let warningMessage: String = "Tested with warnings on %tag%"
-            public static let successfulMessage: String = "Tested successfully on %tag%"
+            public static let errorMessage: String = "Tests \u{1B}[38;5;\(colourRed)mFailed\u{1B}[0m on %tag%"
+            public static let warningMessage: String = "Tested with \u{1B}[38;5;\(colourYellow)mwarnings\u{1B}[0m on %tag%"
+            public static let successfulMessage: String = "Tested \u{1B}[38;5;\(colourGreen)msuccessfully\u{1B}[0m on %tag%"
             
             public static func postSubCommandArguments(callType: DockerSwiftActionCallType,
                                                        image: DockerRepoContainerApp,
@@ -74,9 +77,9 @@ public enum DockerContainerApp {
 
             public static let primaryActionMessage: String = "Running with %tag%"
             public static let retryingMessage: String = "Retrying run on %tag%"
-            public static let errorMessage: String = "Failed to run on %tag%"
-            public static let warningMessage: String = "Ran with warnings on %tag%"
-            public static let successfulMessage: String = "Ran successfully on %tag%"
+            public static let errorMessage: String = "\u{1B}[38;5;\(colourRed)mFailed\u{1B}[0m to run on %tag%"
+            public static let warningMessage: String = "Ran with \u{1B}[38;5;\(colourYellow)mwarnings\u{1B}[0m on %tag%"
+            public static let successfulMessage: String = "Ran \u{1B}[38;5;\(colourGreen)msuccessfully\u{1B}[0m on %tag%"
             
             public static func postSubCommandArguments(callType: DockerSwiftActionCallType,
                                                        image: DockerRepoContainerApp,
@@ -99,9 +102,9 @@ public enum DockerContainerApp {
 
             public static let primaryActionMessage: String = "Executing with %tag%"
             public static let retryingMessage: String = "Retrying execute on %tag%"
-            public static let errorMessage: String = "Failed to execute on %tag%"
-            public static let warningMessage: String = "Executed with warnings on %tag%"
-            public static let successfulMessage: String = "Executed successfully on %tag%"
+            public static let errorMessage: String = "\u{1B}[38;5;\(colourRed)mFailed\u{1B}[0m to execute on %tag%"
+            public static let warningMessage: String = "Executed with \u{1B}[38;5;\(colourYellow)mwarnings\u{1B}[0m on %tag%"
+            public static let successfulMessage: String = "Executed \u{1B}[38;5;\(colourGreen)msuccessfully\u{1B}[0m on %tag%"
             
             public static func postSubCommandArguments(callType: DockerSwiftActionCallType,
                                                        image: DockerRepoContainerApp,
@@ -125,9 +128,9 @@ public enum DockerContainerApp {
 
             public static let primaryActionMessage: String = "Package management with %tag%"
             public static let retryingMessage: String = "Retrying Package management on %tag%"
-            public static let errorMessage: String = "Failed to manage package on %tag%"
-            public static let warningMessage: String = "Package managed with warnings on %tag%"
-            public static let successfulMessage: String = "Package management ran successfully on %tag%"
+            public static let errorMessage: String = "\u{1B}[38;5;\(colourRed)mFailed\u{1B}[0m to manage package on %tag%"
+            public static let warningMessage: String = "Package managed with \u{1B}[38;5;\(colourYellow)mwarnings\u{1B}[0m on %tag%"
+            public static let successfulMessage: String = "Package management ran \u{1B}[38;5;\(colourGreen)msuccessfully\u{1B}[0m on %tag%"
             
             public static func postSubCommandArguments(callType: DockerSwiftActionCallType,
                                                        image: DockerRepoContainerApp,
@@ -673,6 +676,8 @@ public enum DockerContainerApp {
                     
                     if retryCount >= 3 || !DockerResponse.containsRetryableErrors(resp!.output) {
                         retryCount = 3
+                        print("\u{1B}[2K", terminator: "") //errase line
+                        print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line and errase it
                         print(errorMessage.replacingOccurrences(of: "%tag%",
                                                                 with: "\(repoName):\(workingTag)") + ".  Duration: \(formatTimeInterval(duration))")
                     } else {
@@ -695,11 +700,15 @@ public enum DockerContainerApp {
                                                      containerCommand: "bash",
                                                      containerArguments: ["-c", "\(containerCommand) package clean && \(containerCommand) package update"],
                                                      hideOutput: true)
+                        print("\u{1B}[2K", terminator: "") //errase line
+                        print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line and errase it
                         print(retryingMessage.replacingOccurrences(of: "%tag%",
                                                                    with: "\(repoName):\(workingTag)") + ". \(duration)(s)")
                     }
                 } else if DockerResponse.containsWarnings(resp!.output) {
                     retryCount = 3
+                    print("\u{1B}[2K", terminator: "") //errase line
+                    print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line and errase it
                     print(warningMessage.replacingOccurrences(of: "%tag%",
                                                               with: "\(repoName):\(workingTag)") + ".  Duration: \(formatTimeInterval(duration))")
                 } else if DockerResponse.containsDockerError(resp!.output) {
@@ -707,6 +716,8 @@ public enum DockerContainerApp {
                     return 1
                 } else {
                     retryCount = 3
+                    print("\u{1B}[2K", terminator: "") //errase line
+                    print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line and errase it
                     print(successfulMessage.replacingOccurrences(of: "%tag%",
                                                                  with: "\(repoName):\(workingTag)") + ".  Duration: \(formatTimeInterval(duration))")
                 }
