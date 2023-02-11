@@ -52,7 +52,7 @@ let package = Package(
         .package(url: "https://github.com/TheAngryDarling/SwiftUnitTestingHelper.git",
                  from: "1.0.5"),
         .package(url: "https://github.com/TheAngryDarling/SwiftWebRequest.git",
-                 from: "2.0.7"),
+                 from: "2.1.3"),
         .package(url: "https://github.com/TheAngryDarling/SwiftCLICapture.git",
                          from: "3.0.1"),
     ],
