@@ -20,7 +20,7 @@ fileprivate var ramDisk: RamDisk? = nil
 
 public enum DockerContainerRangeApp {
     
-    public static let version: String = "1.0.4"
+    public static let version: String = "1.0.5"
     /// Collection of aruguments that this CLI Application collects
     public enum Arguments {
         
@@ -638,12 +638,17 @@ public enum DockerContainerRangeApp {
                                                              toPath: dest)
                         }
                     }
+                    print("\u{1B}[2K", terminator: "") //errase line
+                    print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line
+                    
                     print("Moved Project '\(packageName)' to RamDrive ('\(rDisk.mountPath)')")
                     volumeMapping.append(.init(physicalPath: rDisk.mountPath, virtualPath: projectDir))
                     
                     workingBuildDir = NSString(string: rDisk.mountPath).appendingPathComponent(".build")
                 }
             } catch {
+                print("\u{1B}[2K", terminator: "") //errase line
+                print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line
                 print("There was an error while trying to create RamDisk for project")
                 print(error)
                 
