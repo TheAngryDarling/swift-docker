@@ -12,7 +12,7 @@ import SwiftDockerCoreLib
 
 public enum DockerContainerApp {
     
-    public static let version: String = "1.0.4"
+    public static let version: String = "1.0.5"
     /// Collection of different actions that are available to perform
     public enum Actions {
         private static let colourRed: Int = 196
@@ -39,7 +39,7 @@ public enum DockerContainerApp {
                     case .singular:
                         return ["-Xswiftc", "-DDOCKER_BUILD"]
                     case .range:
-                        return ["-Xswiftc", "-DDOCKER_ALL_BUILD"]
+                        return ["-Xswiftc", "-DDOCKER_ALL_BUILD", "-Xswiftc", "-DDOCKER_BUILD"]
                 }
             }
         }
@@ -64,7 +64,7 @@ public enum DockerContainerApp {
                     case .singular:
                         return ["-Xswiftc", "-DDOCKER_BUILD"]
                     case .range:
-                        return ["-Xswiftc", "-DDOCKER_ALL_BUILD"]
+                        return ["-Xswiftc", "-DDOCKER_ALL_BUILD", "-Xswiftc", "-DDOCKER_BUILD"]
                 }
             }
         }
@@ -89,7 +89,7 @@ public enum DockerContainerApp {
                     case .singular:
                         return ["-Xswiftc", "-DDOCKER_BUILD"]
                     case .range:
-                        return ["-Xswiftc", "-DDOCKER_ALL_BUILD"]
+                        return ["-Xswiftc", "-DDOCKER_ALL_BUILD", "-Xswiftc", "-DDOCKER_BUILD"]
                 }
             }
         }
@@ -114,7 +114,7 @@ public enum DockerContainerApp {
                     case .singular:
                         return ["-Xswiftc", "-DDOCKER_BUILD"]
                     case .range:
-                        return ["-Xswiftc", "-DDOCKER_ALL_BUILD"]
+                        return ["-Xswiftc", "-DDOCKER_ALL_BUILD", "-Xswiftc", "-DDOCKER_BUILD"]
                 }
             }
         }
@@ -625,11 +625,12 @@ public enum DockerContainerApp {
             var retryCount: Int = 0
             var resp: (terminationStatus: Int32, output: String)? = nil
             var retryCountNaming: String? = nil
-            
+            var executionResponseLine: String? = nil
             while retryCount < 3 {
                 if retryCount > 0 {
                     retryCountNaming = "retry-\(retryCount)"
                 }
+                executionResponseLine = nil
                 
                 let startTime = Date()
                 
@@ -678,8 +679,9 @@ public enum DockerContainerApp {
                         retryCount = 3
                         print("\u{1B}[2K", terminator: "") //errase line
                         print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line and errase it
-                        print(errorMessage.replacingOccurrences(of: "%tag%",
-                                                                with: "\(repoName):\(workingTag)") + ".  Duration: \(formatTimeInterval(duration))")
+                        executionResponseLine = errorMessage.replacingOccurrences(of: "%tag%",
+                                                                                  with: "\(repoName):\(workingTag)") + ".  Duration: \(formatTimeInterval(duration))"
+                        print(executionResponseLine!)
                     } else {
                         
                         _ = try? Docker.runContainer(dockerPath: dockerPath,
@@ -702,15 +704,17 @@ public enum DockerContainerApp {
                                                      hideOutput: true)
                         print("\u{1B}[2K", terminator: "") //errase line
                         print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line and errase it
-                        print(retryingMessage.replacingOccurrences(of: "%tag%",
-                                                                   with: "\(repoName):\(workingTag)") + ". \(duration)(s)")
+                        executionResponseLine = retryingMessage.replacingOccurrences(of: "%tag%",
+                                                                                     with: "\(repoName):\(workingTag)") + ". \(duration)(s)"
+                        print(executionResponseLine!)
                     }
                 } else if DockerResponse.containsWarnings(resp!.output) {
                     retryCount = 3
                     print("\u{1B}[2K", terminator: "") //errase line
                     print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line and errase it
-                    print(warningMessage.replacingOccurrences(of: "%tag%",
-                                                              with: "\(repoName):\(workingTag)") + ".  Duration: \(formatTimeInterval(duration))")
+                    executionResponseLine = warningMessage.replacingOccurrences(of: "%tag%",
+                                                                                with: "\(repoName):\(workingTag)") + ".  Duration: \(formatTimeInterval(duration))"
+                    print(executionResponseLine!)
                 } else if DockerResponse.containsDockerError(resp!.output) {
                     print(resp!.output)
                     return 1
@@ -718,8 +722,9 @@ public enum DockerContainerApp {
                     retryCount = 3
                     print("\u{1B}[2K", terminator: "") //errase line
                     print("\u{1B}[1A\u{1B}[2K", terminator: "") //move up one line and errase it
-                    print(successfulMessage.replacingOccurrences(of: "%tag%",
-                                                                 with: "\(repoName):\(workingTag)") + ".  Duration: \(formatTimeInterval(duration))")
+                    executionResponseLine = successfulMessage.replacingOccurrences(of: "%tag%",
+                                                                                   with: "\(repoName):\(workingTag)") + ".  Duration: \(formatTimeInterval(duration))"
+                    print(executionResponseLine!)
                 }
             }
             
@@ -731,6 +736,9 @@ public enum DockerContainerApp {
                     out = k.stringByReplacingMatches(in: out, withTemplate: v)
                 }
                 print(out)
+            }
+            if let erl = executionResponseLine {
+                print(erl)
             }
         } catch {
             print("Fatal Error trying container '\(workingContainerApp.name):\(workingTag)'")
