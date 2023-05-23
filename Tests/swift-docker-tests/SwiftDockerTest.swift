@@ -1,7 +1,10 @@
 import XCTest
 import UnitTestingHelper
+#if DEBUG
 @testable import SwiftDockerCoreLib
-
+#else
+import SwiftDockerCoreLib
+#endif
 
 
 
