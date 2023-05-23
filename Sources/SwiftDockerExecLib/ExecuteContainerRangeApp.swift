@@ -20,7 +20,7 @@ fileprivate var ramDisk: RamDisk? = nil
 
 public enum DockerContainerRangeApp {
     
-    public static let version: String = "1.0.5"
+    public static let version: String = "1.0.6"
     /// Collection of aruguments that this CLI Application collects
     public enum Arguments {
         
@@ -294,7 +294,7 @@ public enum DockerContainerRangeApp {
             var mountMapping: [Docker.MountMapping] = []
             var findReplace: [String: String] = [:]
             var findReplaceX: [RegEx: String] = [:]
-            var dockerPath: String = Docker.DefaultDockerPath
+            var dockerPath: String? = nil
 
 
             var dockerContainerArguments: [String] = []
@@ -499,6 +499,14 @@ public enum DockerContainerRangeApp {
                     dockerContainerArguments.append(contentsOf: arguments[range])
                     currentArgumentIndex = arguments.count
                 }
+            }
+            
+            if dockerPath == nil {
+                guard let defaultDockerPath = Docker.DefaultDockerPathFromENV else {
+                    printUsage(withMessage: "Unable to locate docker")
+                    return 1
+                }
+                dockerPath = defaultDockerPath
             }
 
             if swiftRepoOrder.isEmpty {

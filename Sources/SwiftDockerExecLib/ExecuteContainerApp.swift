@@ -12,7 +12,7 @@ import SwiftDockerCoreLib
 
 public enum DockerContainerApp {
     
-    public static let version: String = "1.0.5"
+    public static let version: String = "1.0.6"
     /// Collection of different actions that are available to perform
     public enum Actions {
         private static let colourRed: Int = 196
@@ -452,7 +452,7 @@ public enum DockerContainerApp {
         var mountMapping: [Docker.MountMapping] = []
         var findReplace: [String: String] = [:]
         var findReplaceX: [RegEx: String] = [:]
-        var dockerPath: String = Docker.DefaultDockerPath
+        var dockerPath: String? = nil
 
         var tag: DockerHub.RepositoryTag = "latest"
 
@@ -544,6 +544,14 @@ public enum DockerContainerApp {
                 currentArgumentIndex = arguments.count
                 
             }
+        }
+        
+        if dockerPath == nil {
+            guard let defaultDockerPath = Docker.DefaultDockerPathFromENV else {
+                printUsage(withMessage: "Unable to locate docker")
+                return 1
+            }
+            dockerPath = defaultDockerPath
         }
 
         if swiftRepoOrder.isEmpty {
@@ -735,11 +743,18 @@ public enum DockerContainerApp {
                 for (k,v) in findReplaceX {
                     out = k.stringByReplacingMatches(in: out, withTemplate: v)
                 }
-                print(out)
+                // clean up any blank responses
+                out = out.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !out.isEmpty {
+                    print(out)
+                    if let erl = executionResponseLine,
+                       out.countOccurances(of: "\n") > 5 {
+                        print(erl)
+                    }
+                }
+                
             }
-            if let erl = executionResponseLine {
-                print(erl)
-            }
+            
         } catch {
             print("Fatal Error trying container '\(workingContainerApp.name):\(workingTag)'")
             print(error)
@@ -822,7 +837,7 @@ public enum DockerContainerApp {
         var env: [String: String] = [:]
         var volumeMapping: [Docker.VolumeMapping] = []
         var mountMapping: [Docker.MountMapping] = []
-        var dockerPath: String = Docker.DefaultDockerPath
+        var dockerPath: String? = nil
 
         var tag: DockerHub.RepositoryTag = "latest"
 
@@ -899,6 +914,14 @@ public enum DockerContainerApp {
                 currentArgumentIndex = arguments.count
                 
             }
+        }
+        
+        if dockerPath == nil {
+            guard let defaultDockerPath = Docker.DefaultDockerPathFromENV else {
+                printUsage(withMessage: "Unable to locate docker")
+                return 1
+            }
+            dockerPath = defaultDockerPath
         }
 
         if swiftRepoOrder.isEmpty {

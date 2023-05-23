@@ -13,6 +13,7 @@ import CLICapture
 /// Namespace for calling Docker CLI commands
 public enum Docker {
     public enum DockerError: Error {
+        case missingDockerPath
         case processTimedOut
         case noOutputFromCommand
         case failedToConvertDataToString(data: Data, encoding: String.Encoding)
@@ -118,15 +119,61 @@ public enum Docker {
         
     }
     public static let DefaultDockerPath: String = "/usr/local/bin/docker"
+    public static let DefaultDockerPathFromENV: String? = {
+        let path = ProcessInfo.processInfo.environment["PATH"] ?? ""
+        #if os(Windows)
+        let pathComponents: [String] = path.split(separator: ";").map(String.init)
+        let appExt = ".ext"
+        #else
+        let pathComponents: [String] = path.split(separator: ":").map(String.init)
+        let appExt = ""
+        #endif
+        
+        let fs = FileManager.default
+        for item in pathComponents {
+            let appPath = NSString(string: item).appendingPathComponent("docker") + appExt
+            if fs.fileExists(atPath: appPath) {
+                #if !os(Windows)
+                if fs.isExecutableFile(atPath: appPath) {
+                    return appPath
+                }
+                #else
+                // currently not sure if Windows supports the ifExecutableFile check
+                return appPath
+                #endif
+            }
+        }
+        // We check $HOME/.docker/bin/docker because when
+        // testing in Xcode $HOME/.docker/bin is not always
+        // part of the $PATH
+        let homePath = fs.homeDirectoryForCurrentUser
+            .appendingPathComponent(".docker")
+            .appendingPathComponent("bin")
+            .appendingPathComponent("docker" + appExt).path
+        if fs.fileExists(atPath: homePath) {
+            #if !os(Windows)
+            if fs.isExecutableFile(atPath: homePath) {
+                return homePath
+            }
+            #else
+            // currently not sure if Windows supports the ifExecutableFile check
+            return homePath
+            #endif
+        }
+        
+        return nil
+    }()
     
-    public static func capture(dockerPath: String = Docker.DefaultDockerPath,
+    public static func capture(dockerPath: String? = nil,
                                 arguments: [String],
                                attachInput: Bool = false,
                                showCommand: Bool = false,
                                callbackQueue: DispatchQueue = DispatchQueue(label: "Docker.capture.async"),
                                processWroteToItsSTDOutput: ((Process, CLICapture.STDOutputStream) -> Void)? = nil,
                                callback: @escaping (_ terminationStatus: Int32, _ data: Data) -> Void) throws -> Process {
-        
+        guard let dockerPath = dockerPath ?? Docker.DefaultDockerPathFromENV else {
+            throw DockerError.missingDockerPath
+        }
         let capturer = CLICapture(executable: URL(fileURLWithPath: dockerPath))
         if showCommand {
             let args = arguments.reduce("") {
@@ -154,13 +201,16 @@ public enum Docker {
         
     }
     
-    public static func capture(dockerPath: String = Docker.DefaultDockerPath,
+    public static func capture(dockerPath: String? = nil,
                                arguments: [String],
                                attachInput: Bool = false,
                                showCommand: Bool = false,
                                timeout: DispatchTime = .distantFuture) throws -> (terminationStatus: Int32, output: String) {
         
-       
+        guard let dockerPath = dockerPath ?? Docker.DefaultDockerPathFromENV else {
+            throw DockerError.missingDockerPath
+        }
+        
         let semaphore = DispatchSemaphore(value: 0)
         var terminationStatus: Int32 = 0
         var data: Data = Data()
@@ -217,7 +267,7 @@ public enum Docker {
         
     }
     
-    public static func captureSeparate(dockerPath: String = Docker.DefaultDockerPath,
+    public static func captureSeparate(dockerPath: String? = nil,
                                        arguments: [String],
                                        showCommand: Bool = false,
                                        callbackQueue: DispatchQueue = DispatchQueue(label: "Docker.capture.async"),
@@ -225,6 +275,9 @@ public enum Docker {
                                        callback: @escaping (_ terminationStatus: Int32,
                                                             _ outData: Data,
                                                             _ errData: Data) -> Void) throws -> Process {
+        guard let dockerPath = dockerPath ?? Docker.DefaultDockerPathFromENV else {
+            throw DockerError.missingDockerPath
+        }
         
         let capturer = CLICapture(executable: URL(fileURLWithPath: dockerPath))
         if showCommand {
@@ -254,11 +307,13 @@ public enum Docker {
     }
     
     
-    public static func captureSeparate(dockerPath: String = Docker.DefaultDockerPath,
+    public static func captureSeparate(dockerPath: String? = nil,
                                        arguments: [String],
                                        showCommand: Bool = false,
                                        timeout: DispatchTime = .distantFuture) throws -> (terminationStatus: Int32, out: String, err: String) {
-        
+        guard let dockerPath = dockerPath ?? Docker.DefaultDockerPathFromENV else {
+            throw DockerError.missingDockerPath
+        }
         let semaphore = DispatchSemaphore(value: 0)
         var terminationStatus: Int32 = 0
         var hasCompleted: Bool = false
@@ -330,11 +385,15 @@ public enum Docker {
         return (terminationStatus: terminationStatus, out: sOut, err: sErr)
     }
     
-    public static func execute(dockerPath: String = Docker.DefaultDockerPath,
+    public static func execute(dockerPath: String? = nil,
                                arguments: [String],
                                attachInput: Bool = false,
                                showCommand: Bool = false,
                                hideOutput: Bool = false) throws -> Int32 {
+        
+        guard let dockerPath = dockerPath ?? Docker.DefaultDockerPathFromENV else {
+            throw DockerError.missingDockerPath
+        }
         
         let capturer = CLICapture(executable: URL(fileURLWithPath: dockerPath))
         
@@ -416,7 +475,7 @@ public enum Docker {
         return args
     }
     
-    public static func runContainer(dockerPath: String = Docker.DefaultDockerPath,
+    public static func runContainer(dockerPath: String? = nil,
                                     image: String,
                                        containerName: String? = nil,
                                        dockerArguments: [String] = [],
@@ -453,7 +512,7 @@ public enum Docker {
         
     }
     
-    public static func runContainer(dockerPath: String = Docker.DefaultDockerPath,
+    public static func runContainer(dockerPath: String? = nil,
                                     image: String,
                                    containerName: String? = nil,
                                    dockerArguments: [String] = [],
