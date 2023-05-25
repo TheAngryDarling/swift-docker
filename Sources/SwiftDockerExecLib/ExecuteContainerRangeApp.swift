@@ -1073,8 +1073,13 @@ public enum DockerContainerRangeApp {
                             print("Container has timmed out.  Mostlikely Docker has stalled")
                             print("Trying to restart Docker...")
                             print("Killing Docker...")
+                            var appBundle: URL? = nil
                             let apps = NSWorkspace.shared.runningApplications.filter({ return $0.executableURL?.path.contains("Docker.app") ?? false })
                             for app in apps {
+                                if let bundle = app.bundleURL,
+                                   bundle.path.hasPrefix("Docker.app") {
+                                    appBundle = bundle
+                                }
                                 app.forceTerminate()
                             }
                             
@@ -1084,18 +1089,34 @@ public enum DockerContainerRangeApp {
                             var openDockerRetry: Int = 0
                             while openDockerRetry < 3 {
                                 do {
-                                    _ = try NSWorkspace.shared.launchApplication(at: URL(fileURLWithPath: "/Applications/Docker.app"),
-                                                                         options: [],
-                                                                         configuration: [:])
-                                    
-                                    // Try and wait for docker to load
-                                    Thread.sleep(forTimeInterval: 10)
-                                    // Make sure Docker didn't fail loading
-                                    // (Sometime this happens after improper exit, like killing it)
-                                    if NSWorkspace.shared.runningApplications.filter({ return $0.executableURL?.path.contains("Docker.app") ?? false }).count > 0 {
-                                        openDockerRetry = 3
+                                    var app = appBundle
+                                    let homeAppURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications").appendingPathComponent("Docker.app")
+                                    if app == nil &&
+                                        FileManager.default.fileExists(atPath: homeAppURL.path) {
+                                        app = homeAppURL
+                                    }
+                                    if app == nil &&
+                                      FileManager.default.fileExists(atPath: "/Applications/Docker.app") {
+                                        app = URL(fileURLWithPath: "/Applications/Docker.app")
+                                    }
+                                    if let a = app  {
+                                        
+                                        _ = try NSWorkspace.shared.launchApplication(at: a,
+                                                                                     options: [],
+                                                                                     configuration: [:])
+                                        
+                                        // Try and wait for docker to load
+                                        Thread.sleep(forTimeInterval: 10)
+                                        // Make sure Docker didn't fail loading
+                                        // (Sometime this happens after improper exit, like killing it)
+                                        if NSWorkspace.shared.runningApplications.filter({ return $0.executableURL?.path.contains("Docker.app") ?? false }).count > 0 {
+                                            openDockerRetry = 3
+                                        } else {
+                                            openDockerRetry += 1
+                                        }
                                     } else {
-                                        openDockerRetry += 1
+                                        print("Docker application not found")
+                                        openDockerRetry = 3
                                     }
                                 } catch {
                                     openDockerRetry += 1
