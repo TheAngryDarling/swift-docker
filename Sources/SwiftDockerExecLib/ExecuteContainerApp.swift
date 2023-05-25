@@ -12,7 +12,7 @@ import SwiftDockerCoreLib
 
 public enum DockerContainerApp {
     
-    public static let version: String = "1.0.6"
+    public static let version: String = "1.0.7"
     /// Collection of different actions that are available to perform
     public enum Actions {
         private static let colourRed: Int = 196

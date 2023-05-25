@@ -20,7 +20,7 @@ fileprivate var ramDisk: RamDisk? = nil
 
 public enum DockerContainerRangeApp {
     
-    public static let version: String = "1.0.6"
+    public static let version: String = "1.0.7"
     /// Collection of aruguments that this CLI Application collects
     public enum Arguments {
         
