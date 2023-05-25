@@ -11,7 +11,7 @@ internal extension String {
     
     func ranges(of aString: String,
                 options: CompareOptions = [],
-                range searchRange: Range<Self.Index>? = nil,
+                range searchRange: Range<String.Index>? = nil,
                 locale: Locale? = nil) -> [Range<String.Index>] {
         var rtn: [Range<String.Index>] = []
         
@@ -27,7 +27,7 @@ internal extension String {
     }
     func countOccurances(of aString: String,
                          options: CompareOptions = [],
-                         range searchRange: Range<Self.Index>? = nil,
+                         range searchRange: Range<String.Index>? = nil,
                          locale: Locale? = nil) -> Int {
         let r = self.ranges(of: aString,
                             options: options,
