@@ -318,7 +318,7 @@ public enum DockerContainerRangeApp {
                     return 0
                 } else if let _ = Argument.versionArgument.parse(arguments: arguments,
                                                                  startingAt: &currentArgumentIndex) {
-                    print("\(appName) version \(DockerHubList.version)")
+                    print("\(appName) version \(DockerContainerRangeApp.version)")
                     return 0
                 } else if let parsed = fromArgument.parse(arguments: arguments,
                                                           startingAt: &currentArgumentIndex) {

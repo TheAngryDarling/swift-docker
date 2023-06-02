@@ -467,7 +467,7 @@ public enum DockerContainerApp {
                 return 0
             } else if let _ = Argument.versionArgument.parse(arguments: arguments,
                                                              startingAt: &currentArgumentIndex) {
-                print("\(appName) version \(DockerHubList.version)")
+                print("\(appName) version \(DockerContainerApp.version)")
                 return 0
             } else if let parsed = Arguments.swiftRepoOrderArgument.parse(arguments: arguments,
                                                                           startingAt: &currentArgumentIndex,
@@ -853,7 +853,7 @@ public enum DockerContainerApp {
                 return 0
             } else if let _ = Argument.versionArgument.parse(arguments: arguments,
                                                              startingAt: &currentArgumentIndex) {
-                print("\(appName) version \(DockerHubList.version)")
+                print("\(appName) version \(DockerContainerApp.version)")
                 return 0
             } else if let parsed = Arguments.swiftRepoOrderArgument.parse(arguments: arguments,
                                                                           startingAt: &currentArgumentIndex,
